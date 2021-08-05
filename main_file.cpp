@@ -47,7 +47,7 @@ Place, Fifth Floor, Boston, MA  02110 - 1301  USA
 float speed_x=0;
 float speed_y=0;
 float speed_kamera = 0;
-float aspectRatio=1;
+float aspectRatio = 1;
 
 float speed_w = 0; // obrot wierza
 float speed_k = 0; // obrot kadlub
@@ -59,7 +59,7 @@ GLuint tex0;
 GLuint tex1;
 
 Gra* main_game;
-glm::mat4 M_main = glm::mat4(1.0f);
+glm::mat4 global_M_main = glm::mat4(1.0f);
 
 obj3d *pom_obj;
 
@@ -340,11 +340,12 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 	//load2("models\\crate.obj");
 
-	
-
-	
-
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
+
+	//Wypełnianie Gry
+
+	main_game->set_player_tank(t);
+	main_game->set_mainShader(sp);
 }
 
 
@@ -373,7 +374,7 @@ void drawScene(GLFWwindow* window,float angle_x,float angle_y,float obrot_kamery
 
     glm::mat4 P=glm::perspective(50.0f*PI/180.0f, aspectRatio, 0.01f, 50.0f); //Wylicz macierz rzutowania
 
-	glm::mat4 M = M_main;
+	glm::mat4 M = global_M_main;
 	M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Wylicz macierz modelu
 	M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Wylicz macierz modelu
 	
@@ -444,7 +445,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	window = glfwCreateWindow(500, 500, "OpenGL", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
+	window = glfwCreateWindow(500, 500, "TankWars", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
 
 	if (!window) //Jeżeli okna nie udało się utworzyć, to zamknij program
 	{
@@ -475,15 +476,18 @@ int main(void)
         angle_x+=speed_x*glfwGetTime(); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
         angle_y+=speed_y*glfwGetTime(); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
 		czas = glfwGetTime();
-		//t->set_pozycja_wieza(t->get_pozycja_wieza() + speed_w * glfwGetTime());
-		t->obroc_wierze(czas * speed_w);
-		t->obroc_kadlub(czas * speed_k);
-		//M_main = glm::rotate(M_main, czas * speed_k, glm::vec3(0.0f, 0.0f, 0.0f));
-		M_main = glm::translate(M_main, glm::vec3(0.0f, 0.0f,cos(t->get_pozycja_kadlub())*czas*speed_kamera));
-		M_main = glm::translate(M_main, glm::vec3(sin(t->get_pozycja_kadlub()) * czas * speed_kamera,0.0f, 0.0f));
+		
+		t->obroc_wierze(czas * speed_w);  //do przeniesienia do update
+		t->obroc_kadlub(czas * speed_k);  //do przeniesienia do update
+		
+		global_M_main = glm::translate(global_M_main, glm::vec3(0.0f, 0.0f,cos(t->get_pozycja_kadlub())*czas*speed_kamera));
+		global_M_main = glm::translate(global_M_main, glm::vec3(sin(t->get_pozycja_kadlub()) * czas * speed_kamera,0.0f, 0.0f));
+		main_game->set_M_main(global_M_main);
 
         glfwSetTime(0); //Zeruj timer
-		drawScene(window,angle_x,angle_y,t->get_pozycja_wieza()+t->get_pozycja_kadlub()); //Wykonaj procedurę rysującą
+
+		main_game->drawScene(window, t->get_pozycja_wieza() + t->get_pozycja_kadlub());
+		//drawScene(window,angle_x,angle_y,t->get_pozycja_wieza()+t->get_pozycja_kadlub()); //Wykonaj procedurę rysującą
 		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
 	}
 

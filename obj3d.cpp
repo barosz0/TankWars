@@ -60,3 +60,4 @@ void obj3d::set_texture(GLuint t)
 {
 	texture = t;
 }
+
