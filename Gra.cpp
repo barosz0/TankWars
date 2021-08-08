@@ -43,8 +43,25 @@ void Gra::draw(ShaderProgram* sp, glm::mat4 M)
 
 }
 
-void Gra::update(float t)
+void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
 {
+	player_tank->obroc_wierze(czas * speed_wierza);  //do przeniesienia do update
+	player_tank->obroc_kadlub(czas * speed_kadlub);  //do przeniesienia do update
+
+
+	// wersja pierwsza
+	M_main = glm::translate(M_main, glm::vec3(0.0f, 0.0f, cos(player_tank->get_pozycja_kadlub()) * czas * speed_kam));
+	M_main = glm::translate(M_main, glm::vec3(sin(player_tank->get_pozycja_kadlub()) * czas * speed_kam, 0.0f, 0.0f));
+
+
+	//wersja druga
+	pozycja_gracza.x += sin(player_tank->get_pozycja_kadlub()) * czas * speed_kam; 
+	pozycja_gracza.y += cos(player_tank->get_pozycja_kadlub()) * czas * speed_kam;
+
+	if (speed_kam != 0 || speed_kadlub!=0)
+		player_tank->update(czas,1);
+	else
+		player_tank->update(czas, 0);
 	
 }
 
@@ -68,7 +85,13 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 	glUniformMatrix4fv(mainShader->u("P"), 1, false, glm::value_ptr(P));
 	glUniformMatrix4fv(mainShader->u("V"), 1, false, glm::value_ptr(V));
 
-	glm::mat4 M = M_main;
+	//glm::mat4 M = M_main;
+
+	glm::mat4 M = glm::mat4(1.0f);
+	M = glm::translate(M, glm::vec3(0.0f, 0.0f, pozycja_gracza.y));
+	M = glm::translate(M, glm::vec3(pozycja_gracza.x, 0.0f, 0.0f));
+
+
 	M = glm::translate(M, glm::vec3(0.0f, -0.8f, 0.0f));
 
 	draw(mainShader, M); // do potencjalnego scalenia
@@ -95,6 +118,7 @@ void Gra::set_player_tank(Tank* t)
 {
 	player_tank = t;
 }
+
 
 glm::mat4 Gra::get_M_main()
 {

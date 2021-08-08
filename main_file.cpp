@@ -445,7 +445,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	window = glfwCreateWindow(500, 500, "TankWars", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
+	window = glfwCreateWindow(1000, 1000, "TankWars", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
 
 	if (!window) //Jeżeli okna nie udało się utworzyć, to zamknij program
 	{
@@ -477,12 +477,14 @@ int main(void)
         angle_y+=speed_y*glfwGetTime(); //Zwiększ/zmniejsz kąt obrotu na podstawie prędkości i czasu jaki upłynał od poprzedniej klatki
 		czas = glfwGetTime();
 		
-		t->obroc_wierze(czas * speed_w);  //do przeniesienia do update
-		t->obroc_kadlub(czas * speed_k);  //do przeniesienia do update
+		//t->obroc_wierze(czas * speed_w);  //do przeniesienia do update
+		//t->obroc_kadlub(czas * speed_k);  //do przeniesienia do update
 		
-		global_M_main = glm::translate(global_M_main, glm::vec3(0.0f, 0.0f,cos(t->get_pozycja_kadlub())*czas*speed_kamera));
-		global_M_main = glm::translate(global_M_main, glm::vec3(sin(t->get_pozycja_kadlub()) * czas * speed_kamera,0.0f, 0.0f));
-		main_game->set_M_main(global_M_main);
+		//global_M_main = glm::translate(global_M_main, glm::vec3(0.0f, 0.0f,cos(t->get_pozycja_kadlub())*czas*speed_kamera));
+		//global_M_main = glm::translate(global_M_main, glm::vec3(sin(t->get_pozycja_kadlub()) * czas * speed_kamera,0.0f, 0.0f));
+		//main_game->set_M_main(global_M_main);
+
+		main_game->update(czas, speed_kamera, speed_w, speed_k);
 
         glfwSetTime(0); //Zeruj timer
 

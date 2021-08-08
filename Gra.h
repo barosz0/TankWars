@@ -24,9 +24,10 @@ class Gra
 	ShaderProgram* mainShader;
 	glm::mat4 M_main;
 
-	wspolzedne pozycja_gracza;
+
 
 	Tank* player_tank; // do zmiany na obiekt "player"
+	wspolzedne pozycja_gracza; // do zmiany na obiekt "player"
 
 	void create_game();
 
@@ -35,7 +36,7 @@ public:
 	Gra();
 	Gra(obj3d *z);
 	void draw(ShaderProgram* sp, glm::mat4 M); 
-	void update(float t);
+	void update(float t, float speed_kam, float speed_wierza, float speed_kadlub);
 	void drawScene(GLFWwindow* window, float obrot_kamery);
 
 	//get set

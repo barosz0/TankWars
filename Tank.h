@@ -17,12 +17,17 @@ class Tank
 	float pozycja_wieza; // obrot wiezy
 	float pozycja_kadlub; // obrot kadluba
 
+	float progres_animacji_kdlub;
+	float progres_animacji_tracks;
+
+
 public:
 
 	Tank();
 	Tank(obj3d turret_obj, obj3d hull_obj, obj3d tracks_obj);
 
 	void draw(ShaderProgram* sp,glm::mat4 M);
+	void update(float czas, bool czy_anim_tracks);
 
 	float get_pozycja_wieza();
 	void set_pozycja_wieza(float p);

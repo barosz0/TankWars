@@ -11,13 +11,20 @@ Tank::Tank(obj3d turret_obj, obj3d hull_obj, obj3d tracks_obj)
 
 void Tank::draw(ShaderProgram* sp,glm::mat4 M)
 {
+	float tempo_animacji_poziom = 20;
+	float tempo_animacji_pion = 30;
+	float tempo_animacji_kadlub = 60;
+
 	M = glm::rotate(M, -PI/2, glm::vec3(0.0f, 1.0f, 0.0f)); // wyprostowanie czolgu wzglendem kamery
-
-
 	M = glm::rotate(M, pozycja_kadlub, glm::vec3(0.0f, 1.0f, 0.0f));
-	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+
+	glm::mat4 HM = glm::translate(M, glm::vec3(0.0f, cos(progres_animacji_kdlub * tempo_animacji_kadlub) / 400, 0.0f));
+	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(HM));
 
 	hull.draw(sp);
+
+	glm::mat4 TM = glm::translate(M, glm::vec3(sin(progres_animacji_tracks * tempo_animacji_poziom)/100, cos(progres_animacji_tracks * tempo_animacji_pion)/300, 0.0f)); //animacja tracks
+	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(TM));
 	tracks.draw(sp);
 
 	M = glm::rotate(M, pozycja_wieza, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -25,6 +32,13 @@ void Tank::draw(ShaderProgram* sp,glm::mat4 M)
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
 	turret.draw(sp);
+}
+
+void Tank::update(float czas,bool czy_anim_tracks)
+{
+	progres_animacji_kdlub += czas;
+	if(czy_anim_tracks) progres_animacji_tracks += czas;
+	//progres_animacji = fmod(progres_animacji,0.2);
 }
 
 void Tank::set_pozycja_wieza(float p)
