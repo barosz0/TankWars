@@ -42,6 +42,8 @@ Place, Fifth Floor, Boston, MA  02110 - 1301  USA
 #include "Tank.h"
 #include "obj3d.h"
 #include "Gra.h"
+#include "Glob.h"
+
 
 
 float speed_x=0;
@@ -61,7 +63,7 @@ GLuint tex1;
 Gra* main_game;
 glm::mat4 global_M_main = glm::mat4(1.0f);
 
-obj3d *pom_obj;
+
 
 Tank *t;
 
@@ -290,7 +292,7 @@ void windowResizeCallback(GLFWwindow* window,int width,int height) {
 //Procedura inicjująca
 void initOpenGLProgram(GLFWwindow* window) {
 	//************Tutaj umieszczaj kod, który należy wykonać raz, na początku programu************
-	
+	obj3d* pom_obj;
 	
 	tex1 = readTexture("sky.png");
 	glClearColor(0,0,0,1);
@@ -327,25 +329,47 @@ void initOpenGLProgram(GLFWwindow* window) {
 	normals = r[2];
 	vertexCount = *r[3];
 
+	//ladowanie scian i podloza;
 	tex0 = readTexture("models\\Squere\\GrassTex.png");
 	r = load("models\\Squere\\Squere.obj");
 	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 	
 	main_game = new Gra(pom_obj);
 
+	tex0 = readTexture("bricks.png");
+	r = load("models\\Squere\\Squere.obj");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+	main_game->set_sciana_obj(pom_obj);
+
+	//ladowanie przeszkod
+
+	std::vector<obj3d*>* przeszkody = new std::vector<obj3d*>;
+
+	tex0 = readTexture("models\\crate_1.png");
+	r = load("models\\crate.obj");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+
+	przeszkody->push_back(pom_obj);
+
+	
+
 	/*tex0 = readTexture("models\\SkyBox\\Tex.png");
 	r = load("models\\SkyBox\\Skybox.obj");
 	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);*/
 
 
-	//load2("models\\crate.obj");
+	
+
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
 
-	//Wypełnianie Gry
 
+	//Wypełnianie Gry
+	main_game->set_modele_przeszkod(przeszkody);
 	main_game->set_player_tank(t);
 	main_game->set_mainShader(sp);
+
+	main_game->create_game();
 }
 
 

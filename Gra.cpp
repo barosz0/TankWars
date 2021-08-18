@@ -3,33 +3,37 @@
 Gra::Gra()
 {
 	rozmiar_mapy = 10;
-	M_main = glm::mat4(1.0f);
-	create_game();
+	//create_game();
 
 }
 
 Gra::Gra(obj3d *z)
 {
+
 	podloze_obj = z;
 	rozmiar_mapy = 10;
-	M_main = glm::mat4(1.0f);
-	create_game();
+	//create_game();
 
 }
 
 
 void Gra::create_game()
 {
-	//podloze = new int* [rozmiar_mapy];
-	//for (int i = 0; i < rozmiar_mapy; i++)
-	//{
-	//	podloze[i] = new int[rozmiar_mapy];
-	//}
+	flagi_blokady_pola.resize(rozmiar_mapy);
+	for (int i = 0; i < rozmiar_mapy; i++)
+	{
+		flagi_blokady_pola[i].resize(rozmiar_mapy);
+	}
+
+	//wspolzedne pom_w = { rand()%10*2,rand() % 10 * 2 };
+
+
+	przeszkoda = new Obstacle(modele_przeskod->operator[](rand()%modele_przeskod->size()), wspolzedne(rand() % 10 * 2, rand() % 10 * 2));
 }
 
-void Gra::draw(ShaderProgram* sp, glm::mat4 M)
+void Gra::draw(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 {
-
+	//rysowanie podlogi
 	glm::mat4 pom_M = M;
 	for(int j=0;j<rozmiar_mapy;j++)
 		for (int i = 0; i < rozmiar_mapy; i++)
@@ -40,7 +44,60 @@ void Gra::draw(ShaderProgram* sp, glm::mat4 M)
 			podloze_obj->draw(sp);
 		}
 
+	//rysowanie scian
+	glm::mat4 pom_MS= glm::translate(M, glm::vec3(0.0f, 0.0f, -1.0f));
+	pom_MS = glm::rotate(pom_MS, PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
 
+
+
+	for (int i = 0; i < rozmiar_mapy; i++)
+	{
+		pom_M = glm::translate(pom_MS, glm::vec3(2.0f*i, 0.0f, 0.0f));
+		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
+		sciana_obj->draw(sp);
+	}
+
+
+	pom_MS = glm::translate(M, glm::vec3(0.0f, 0.0f, -1.0f));
+	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(-1.0f, 0.0f, 0.0f));
+
+	for (int i = 0; i < rozmiar_mapy; i++)
+	{
+		pom_M = glm::translate(pom_MS, glm::vec3(2.0f * i, -rozmiar_mapy  * 2, 0.0f));
+		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
+		sciana_obj->draw(sp);
+	}
+
+
+	pom_MS = glm::translate(M, glm::vec3(-1.0f, 0.0f, 0.0f));
+	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
+	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 1.0f, 0.0f));
+	//glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_MS));
+	//sciana_obj->draw(sp);
+
+	
+		for (int i = 0; i < rozmiar_mapy; i++)
+		{
+			pom_M = glm::translate(pom_MS, glm::vec3(-2.0f * i, 0.0f, 0.0f));
+			glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
+			sciana_obj->draw(sp);
+		}
+
+		pom_MS = glm::translate(M, glm::vec3(-1.0f, 0.0f, 0.0f));
+		pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 0.0f, 1.0f));
+		pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		for (int i = 0; i < rozmiar_mapy; i++)
+		{
+			pom_M = glm::translate(pom_MS, glm::vec3(-2.0f * i, -rozmiar_mapy*2, 0.0f));
+			glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
+			sciana_obj->draw(sp);
+		}
+
+		M = glm::scale(M, glm::vec3(0.5, 0.5, 0.5));
+		M = glm::translate(M, glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		przeszkoda->draw(sp,M);
 }
 
 void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
@@ -49,14 +106,10 @@ void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kad
 	player_tank->obroc_kadlub(czas * speed_kadlub);  //do przeniesienia do update
 
 
-	// wersja pierwsza
-	M_main = glm::translate(M_main, glm::vec3(0.0f, 0.0f, cos(player_tank->get_pozycja_kadlub()) * czas * speed_kam));
-	M_main = glm::translate(M_main, glm::vec3(sin(player_tank->get_pozycja_kadlub()) * czas * speed_kam, 0.0f, 0.0f));
 
+	//rusz_gracza(czas * speed_kam);
+	rusz_gracza(czas * speed_kam*5); //szybszy ruch
 
-	//wersja druga
-	pozycja_gracza.x += sin(player_tank->get_pozycja_kadlub()) * czas * speed_kam; 
-	pozycja_gracza.y += cos(player_tank->get_pozycja_kadlub()) * czas * speed_kam;
 
 	if (speed_kam != 0 || speed_kadlub!=0)
 		player_tank->update(czas,1);
@@ -104,15 +157,28 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 	glfwSwapBuffers(window); //Przerzuæ tylny bufor na przedni
 }
 
+void Gra::rusz_gracza(float dystans)
+{
+	float pomX = pozycja_gracza.x, pomY = pozycja_gracza.y;
+	pomX += sin(player_tank->get_pozycja_kadlub()) * dystans;
+	pomY += cos(player_tank->get_pozycja_kadlub()) * dystans;
+	
+	if (pomX > 0.5)pomX = 0.5;
+	if (pomY > 0.5)pomY = 0.5;
+
+	if (pomX < -rozmiar_mapy * 2+1.5)pomX = -rozmiar_mapy * 2+1.5;
+	if (pomY < -rozmiar_mapy * 2+1.5)pomY = -rozmiar_mapy * 2+1.5;
+	
+	pozycja_gracza.x = pomX;
+	pozycja_gracza.y = pomY;
+	std::cout << pozycja_gracza.x << " | " << pozycja_gracza.y << std::endl;
+}
+
 void Gra::set_mainShader(ShaderProgram* sp)
 {
 	mainShader = sp;
 }
 
-void Gra::set_M_main(glm::mat4 M)
-{
-	M_main = M;
-}
 
 void Gra::set_player_tank(Tank* t)
 {
@@ -120,7 +186,19 @@ void Gra::set_player_tank(Tank* t)
 }
 
 
-glm::mat4 Gra::get_M_main()
+
+void Gra::set_sciana_obj(obj3d* o)
 {
-	return M_main;
+	sciana_obj = o;
+}
+
+
+void Gra::set_rozmiar_mapy(int r)
+{
+	rozmiar_mapy = r;
+}
+
+void Gra::set_modele_przeszkod(std::vector<obj3d*>* mp)
+{
+	modele_przeskod = mp;
 }

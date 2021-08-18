@@ -1,35 +1,40 @@
 #pragma once
 #include "obj3d.h"
 #include "Tank.h"
+#include "Obstacle.h"
 
 #include "constants.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+#include <cstdlib>
+#include <iostream>
 
 
-
-struct wspolzedne {
-	float x=0;
-	float y=0;
-};
 
 class Gra
 {
+
+	std::vector<obj3d*>* modele_przeskod;
+
 	int rozmiar_mapy;
+
+	Obstacle* przeszkoda;
+	std::vector<std::vector<int>> flagi_blokady_pola;
 	//int** podloze;
 	obj3d* podloze_obj;
+	obj3d* sciana_obj;
 
 	ShaderProgram* mainShader;
-	glm::mat4 M_main;
 
 
 
 	Tank* player_tank; // do zmiany na obiekt "player"
 	wspolzedne pozycja_gracza; // do zmiany na obiekt "player"
 
-	void create_game();
+	
 
 public:
 	
@@ -39,12 +44,20 @@ public:
 	void update(float t, float speed_kam, float speed_wierza, float speed_kadlub);
 	void drawScene(GLFWwindow* window, float obrot_kamery);
 
+	void create_game();
+
 	//get set
 
 	void set_mainShader(ShaderProgram* sp);
-	void set_M_main(glm::mat4 M);
 	void set_player_tank(Tank* t);
+	void set_sciana_obj(obj3d* o);
 
-	glm::mat4 get_M_main();
+	//set startowe
+	void set_global(Glob *g);
+	void set_rozmiar_mapy(int r);
+	void set_modele_przeszkod(std::vector<obj3d*>* mp);
+
+	void rusz_gracza(float s); // do zmiany na obiekt "player"
+
 };
 
