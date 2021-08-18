@@ -21,7 +21,8 @@ class Gra
 
 	int rozmiar_mapy;
 
-	Obstacle* przeszkoda;
+
+	std::vector<Obstacle*> przeszkody;
 	std::vector<std::vector<int>> flagi_blokady_pola;
 	//int** podloze;
 	obj3d* podloze_obj;

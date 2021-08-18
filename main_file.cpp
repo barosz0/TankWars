@@ -288,8 +288,8 @@ void keyCallback(GLFWwindow* window,int key,int scancode,int action,int mods) {
 		if (key == GLFW_KEY_D) speed_k -= PI / 2;
 
 		// ruch przod tyl
-		if (key == GLFW_KEY_W) speed_kamera -= PI / 2;
-		if (key == GLFW_KEY_S) speed_kamera += PI / 2;
+		if (key == GLFW_KEY_W) speed_kamera += PI / 2;
+		if (key == GLFW_KEY_S) speed_kamera -= PI / 2;
 
     }
     if (action==GLFW_RELEASE) {
@@ -307,8 +307,8 @@ void keyCallback(GLFWwindow* window,int key,int scancode,int action,int mods) {
 		if (key == GLFW_KEY_D) speed_k += PI / 2;
 
 		// ruch przod tyl
-		if (key == GLFW_KEY_W) speed_kamera += PI / 2;
-		if (key == GLFW_KEY_S) speed_kamera -= PI / 2;
+		if (key == GLFW_KEY_W) speed_kamera -= PI / 2;
+		if (key == GLFW_KEY_S) speed_kamera += PI / 2;
     }
 }
 
@@ -336,6 +336,8 @@ void initOpenGLProgram(GLFWwindow* window) {
 	//load("models\\1t.obj");
 
 	vector<float*> r;
+	
+	//ladowanie czolgu
 
 	tex0 = readTexture("models\\Tank\\turret.png");
 	r = load("models\\Tank\\TurretT.obj");

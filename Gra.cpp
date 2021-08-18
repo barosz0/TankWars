@@ -27,8 +27,20 @@ void Gra::create_game()
 
 	//wspolzedne pom_w = { rand()%10*2,rand() % 10 * 2 };
 
+	int los_x = rand() % rozmiar_mapy;
+	int los_y = rand() % rozmiar_mapy;
 
-	przeszkoda = new Obstacle(modele_przeskod->operator[](rand()%modele_przeskod->size()), wspolzedne(rand() % 10 * 2, rand() % 10 * 2));
+	for (int i = 0; i < 10; i++) {
+
+		while (flagi_blokady_pola[los_x][los_y] != 0) {
+			los_x = rand() % rozmiar_mapy;
+			los_y = rand() % rozmiar_mapy;
+		}
+		
+		flagi_blokady_pola[los_x][los_y] = 1;
+
+		przeszkody.push_back(new Obstacle(modele_przeskod->operator[](rand() % modele_przeskod->size()),wspolzedne(los_x*2,los_y*2)));
+	}
 }
 
 void Gra::draw(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
@@ -94,10 +106,16 @@ void Gra::draw(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 			sciana_obj->draw(sp);
 		}
 
-		M = glm::scale(M, glm::vec3(0.5, 0.5, 0.5));
-		M = glm::translate(M, glm::vec3(0.0f, 1.0f, 0.0f));
 		
-		przeszkoda->draw(sp,M);
+		
+		//rysowanie przeszkod
+
+		
+
+		for (int i = 0; i < przeszkody.size(); i++)
+		{
+			przeszkody[i]->draw(sp,M);
+		}
 }
 
 void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
@@ -141,8 +159,8 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 	//glm::mat4 M = M_main;
 
 	glm::mat4 M = glm::mat4(1.0f);
-	M = glm::translate(M, glm::vec3(0.0f, 0.0f, pozycja_gracza.y));
-	M = glm::translate(M, glm::vec3(pozycja_gracza.x, 0.0f, 0.0f));
+	M = glm::translate(M, glm::vec3(0.0f, 0.0f, -pozycja_gracza.y));
+	M = glm::translate(M, glm::vec3(-pozycja_gracza.x, 0.0f, 0.0f));
 
 
 	M = glm::translate(M, glm::vec3(0.0f, -0.8f, 0.0f));
@@ -159,19 +177,49 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 
 void Gra::rusz_gracza(float dystans)
 {
+
 	float pomX = pozycja_gracza.x, pomY = pozycja_gracza.y;
 	pomX += sin(player_tank->get_pozycja_kadlub()) * dystans;
 	pomY += cos(player_tank->get_pozycja_kadlub()) * dystans;
 	
-	if (pomX > 0.5)pomX = 0.5;
-	if (pomY > 0.5)pomY = 0.5;
+	if (pomX < -0.5)pomX = -0.5;
+	if (pomY < -0.5)pomY = -0.5;
 
-	if (pomX < -rozmiar_mapy * 2+1.5)pomX = -rozmiar_mapy * 2+1.5;
-	if (pomY < -rozmiar_mapy * 2+1.5)pomY = -rozmiar_mapy * 2+1.5;
+	if (pomX > rozmiar_mapy * 2-1.5)pomX = rozmiar_mapy * 2-1.5;
+	if (pomY > rozmiar_mapy * 2-1.5)pomY = rozmiar_mapy * 2-1.5;
+
+	bool kolizja = false;
+	wspolzedne pomW(pomX,pomY);
+
+	for (int i = 0; i < przeszkody.size(); i++)
+	{
+		if (kolizja = przeszkody[i]->czy_kolizja(pomW))
+			return;
+	}
+
+	//wersja z funkcjia w obiekcie przeszkody
+	/*do {
+		kolizja = false;
+		int i;
+		for (i = 0; i < przeszkody.size(); i++)
+		{
+			if (kolizja = przeszkody[i]->czy_kolizja(pomW))
+				return;
+				//break;
+		}
+		if (kolizja)
+		{
+			pomW=przeszkody[i]->rozwiaz_kolizje(pozycja_gracza, pomW, 3);
+		}
+
+	} while (kolizja);
+	*/
+	pozycja_gracza = pomW;
+
+	//pozycja_gracza.x = pomX;
+	//pozycja_gracza.y = pomY;
+	//std::cout << pozycja_gracza.x << " | " << pozycja_gracza.y << std::endl;
 	
-	pozycja_gracza.x = pomX;
-	pozycja_gracza.y = pomY;
-	std::cout << pozycja_gracza.x << " | " << pozycja_gracza.y << std::endl;
 }
 
 void Gra::set_mainShader(ShaderProgram* sp)
