@@ -56,6 +56,18 @@ float speed_k = 0; // obrot kadlub
 
 
 ShaderProgram *sp;
+ShaderProgram *SkyboxShader;
+
+using namespace std;
+
+vector <const char*> skybox_faces = { //wczytać poźniej
+	"models\\Skybox\\right.png",
+	"models\\Skybox\\left.png",
+	"models\\Skybox\\top.png",
+	"models\\Skybox\\bot.png",
+	"models\\Skybox\\front.png",
+	"models\\Skybox\\back.png"
+};
 
 GLuint tex0;
 GLuint tex1;
@@ -82,7 +94,7 @@ int vertexCount = myCubeVertexCount;
 //float* colors = myTeapotColors;
 //int vertexCount = myTeapotVertexCount;
 
-using namespace std;
+
 
 vector<float*> load(string fn)
 {
@@ -211,7 +223,24 @@ vector<float*> load(string fn)
 	return ret;
 }
 
+unsigned int loadSkybox() {
+	unsigned int ID_tekstury;
+	glGenTextures(1, &ID_tekstury);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ID_tekstury);
+	unsigned width, height, error;
+	vector<unsigned char> image;
+	for (int i = 0; i < 6; i++) {
+		error = lodepng::decode(image, width, height, skybox_faces[i]);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+	return ID_tekstury;
+}
 
 GLuint readTexture(const char* filename) {
 	GLuint tex;
@@ -362,7 +391,8 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
-
+	SkyboxShader = new ShaderProgram("skybox.vs", NULL, "skybox.fs");
+	unsigned int SkyboxTexture = loadSkybox();
 
 	//Wypełnianie Gry
 	main_game->set_modele_przeszkod(przeszkody);
