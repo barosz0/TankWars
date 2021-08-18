@@ -186,7 +186,6 @@ void Gra::set_player_tank(Tank* t)
 }
 
 
-
 void Gra::set_sciana_obj(obj3d* o)
 {
 	sciana_obj = o;

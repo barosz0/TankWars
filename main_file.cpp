@@ -42,7 +42,7 @@ Place, Fifth Floor, Boston, MA  02110 - 1301  USA
 #include "Tank.h"
 #include "obj3d.h"
 #include "Gra.h"
-#include "Glob.h"
+
 
 
 

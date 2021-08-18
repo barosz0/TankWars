@@ -53,7 +53,7 @@ public:
 	void set_sciana_obj(obj3d* o);
 
 	//set startowe
-	void set_global(Glob *g);
+	
 	void set_rozmiar_mapy(int r);
 	void set_modele_przeszkod(std::vector<obj3d*>* mp);
 
