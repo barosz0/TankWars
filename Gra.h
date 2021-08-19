@@ -41,7 +41,7 @@ public:
 	
 	Gra();
 	Gra(obj3d *z);
-	void draw(ShaderProgram* sp, glm::mat4 M); 
+	void draw_map(ShaderProgram* sp, glm::mat4 M); 
 	void update(float t, float speed_kam, float speed_wierza, float speed_kadlub);
 	void drawScene(GLFWwindow* window, float obrot_kamery);
 

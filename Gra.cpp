@@ -43,7 +43,7 @@ void Gra::create_game()
 	}
 }
 
-void Gra::draw(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
+void Gra::draw_map(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 {
 	//rysowanie podlogi
 	glm::mat4 pom_M = M;
@@ -120,6 +120,9 @@ void Gra::draw(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 
 void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
 {
+	if (speed_kam < 0)
+		speed_kadlub*= (-1);
+
 	player_tank->obroc_wierze(czas * speed_wierza);  //do przeniesienia do update
 	player_tank->obroc_kadlub(czas * speed_kadlub);  //do przeniesienia do update
 
@@ -165,7 +168,7 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 
 	M = glm::translate(M, glm::vec3(0.0f, -0.8f, 0.0f));
 
-	draw(mainShader, M); // do potencjalnego scalenia
+	draw_map(mainShader, M); // do potencjalnego scalenia
 
 	glm::mat4 TM = glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)); // macierz czo³gu
 	TM = glm::translate(TM, glm::vec3(0.0f, -2.4f, 0.0f));

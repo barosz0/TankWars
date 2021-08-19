@@ -442,7 +442,7 @@ void drawScene(GLFWwindow* window,float angle_x,float angle_y,float obrot_kamery
     glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
 
 	//glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-	main_game->draw(sp, M);
+	//main_game->draw(sp, M);
 
 	glm::mat4 TM = glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5));
 	TM = glm::translate(TM, glm::vec3(0.0f, -2.4f, 0.0f));

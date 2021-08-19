@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Gra.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="myCube.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="Tank.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Gra.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main_file.cpp" />
