@@ -78,6 +78,7 @@ glm::mat4 global_M_main = glm::mat4(1.0f);
 
 
 Tank *t;
+Tank *te;
 
 //Odkomentuj, żeby rysować kostkę
 float* vertices = myCubeVertices;
@@ -342,17 +343,26 @@ void initOpenGLProgram(GLFWwindow* window) {
 	tex0 = readTexture("models\\Tank\\turret.png");
 	r = load("models\\Tank\\TurretT.obj");
 	obj3d tank_turret(r[0], r[2], r[1], *r[3], tex0);
+	
+	tex0 = readTexture("models\\Tank\\enemyTex\\turret_enemy.png");
+	obj3d tank_turret_red(r[0], r[2], r[1], *r[3], tex0);
 
 	tex0 = readTexture("models\\Tank\\hull.png");
 	r = load("models\\Tank\\HullT.obj");
 	obj3d tank_hull(r[0], r[2], r[1], *r[3], tex0);
 
+	tex0 = readTexture("models\\Tank\\enemyTex\\hull_enemy.png");
+	obj3d tank_hull_red(r[0], r[2], r[1], *r[3], tex0);
+
 	tex0 = readTexture("models\\Tank\\tracks.png");
 	r = load("models\\Tank\\TracksT.obj");
 	obj3d tank_tracks(r[0], r[2], r[1], *r[3], tex0);
 
-	t = new Tank(tank_turret, tank_hull, tank_tracks);
+	tex0 = readTexture("models\\Tank\\enemyTex\\tracks_enemy.png");
+	obj3d tank_tracks_red(r[0], r[2], r[1], *r[3], tex0);
 
+	t = new Tank(tank_turret, tank_hull, tank_tracks);
+	te = new Tank(tank_turret_red, tank_hull_red, tank_tracks_red);
 	
 
 	vertices = r[0];
@@ -399,6 +409,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	//Wypełnianie Gry
 	main_game->set_modele_przeszkod(przeszkody);
 	main_game->set_player_tank(t);
+	main_game->set_enemy_tank(te);
 	main_game->set_mainShader(sp);
 
 	main_game->create_game();

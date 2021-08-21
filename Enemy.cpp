@@ -4,10 +4,21 @@ Enemy::Enemy()
 
 }
 
+Enemy::Enemy(Tank *t, wspolzedne p)
+{
+	tank_model = t;
+	pozycja = p;
+}
+
 void Enemy::draw(ShaderProgram* sp, glm::mat4 M)
 {
-	glm::translate(M, glm::vec3(pozycja.x, 0.0f, pozycja.y));
-	tank_model->draw(sp, M);
+	glm::mat4 pom_M = glm::translate(M, glm::vec3(pozycja.x, 0.0f, pozycja.y));
+
+	pom_M = glm::scale(pom_M, glm::vec3(0.5, 0.5, 0.5));
+
+	pom_M = glm::translate(pom_M, glm::vec3(0.0f, -0.8f, 0.0f));
+
+	tank_model->draw(sp, pom_M);
 }
 
 void Enemy::update(float czas)

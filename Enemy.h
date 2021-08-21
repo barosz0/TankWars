@@ -11,6 +11,7 @@ class Enemy
 
 public:
 	Enemy();
+	Enemy(Tank *t, wspolzedne p);
 
 	void draw(ShaderProgram* sp, glm::mat4 M);
 	void update(float czas); // tu mo¿e byc zwracana flaga akcji

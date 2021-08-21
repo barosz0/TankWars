@@ -19,14 +19,16 @@ Gra::Gra(obj3d *z)
 
 void Gra::create_game()
 {
+	//tworzenie tablicy flag zajecia pola
 	flagi_blokady_pola.resize(rozmiar_mapy);
 	for (int i = 0; i < rozmiar_mapy; i++)
 	{
 		flagi_blokady_pola[i].resize(rozmiar_mapy);
 	}
 
-	//wspolzedne pom_w = { rand()%10*2,rand() % 10 * 2 };
 
+
+	//tworzenie przeszkod
 	int los_x = rand() % rozmiar_mapy;
 	int los_y = rand() % rozmiar_mapy;
 
@@ -40,6 +42,22 @@ void Gra::create_game()
 		flagi_blokady_pola[los_x][los_y] = 1;
 
 		przeszkody.push_back(new Obstacle(modele_przeskod->operator[](rand() % modele_przeskod->size()),wspolzedne(los_x*2,los_y*2)));
+	}
+
+	//tworzenie przeciwnikow
+	los_x = rand() % rozmiar_mapy;
+	los_y = rand() % rozmiar_mapy;
+
+	for (int i = 0; i < 3; i++) {
+
+		while (flagi_blokady_pola[los_x][los_y] != 0) {
+			los_x = rand() % rozmiar_mapy;
+			los_y = rand() % rozmiar_mapy;
+		}
+
+		flagi_blokady_pola[los_x][los_y] = 2;
+
+		przeciwnicy.push_back(new Enemy(enemy_tank,wspolzedne(los_x,los_y)));
 	}
 }
 
@@ -118,6 +136,14 @@ void Gra::draw_map(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 		}
 }
 
+void Gra::draw_enemy(ShaderProgram* sp, glm::mat4 M)
+{
+	for (int i = 0; i < przeciwnicy.size(); i++)
+	{
+		przeciwnicy[i]->draw(sp, M);
+	}
+}
+
 void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
 {
 	if (speed_kam < 0)
@@ -137,6 +163,10 @@ void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kad
 	else
 		player_tank->update(czas, 0);
 	
+	for (int i = 0; i < przeciwnicy.size(); i++)
+	{
+		przeciwnicy[i]->update(czas);
+	}
 }
 
 void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
@@ -169,6 +199,7 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 	M = glm::translate(M, glm::vec3(0.0f, -0.8f, 0.0f));
 
 	draw_map(mainShader, M); // do potencjalnego scalenia
+	draw_enemy(mainShader, M);
 
 	glm::mat4 TM = glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)); // macierz czo³gu
 	TM = glm::translate(TM, glm::vec3(0.0f, -2.4f, 0.0f));
@@ -234,6 +265,11 @@ void Gra::set_mainShader(ShaderProgram* sp)
 void Gra::set_player_tank(Tank* t)
 {
 	player_tank = t;
+}
+
+void Gra::set_enemy_tank(Tank* t)
+{
+	enemy_tank = t;
 }
 
 
