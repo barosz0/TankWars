@@ -1,13 +1,19 @@
 #include "Tank.h"
+Tank::Tank()
+{
 
-Tank::Tank(obj3d turret_obj, obj3d hull_obj, obj3d tracks_obj)
+}
+
+Tank::Tank(obj3d *turret_obj, obj3d *hull_obj, obj3d *tracks_obj)
 {
 	turret = turret_obj;
 	hull = hull_obj;
 	tracks = tracks_obj;
-	pozycja_wieza = 0;
-	pozycja_kadlub = 0;
+	pozycja_wieza = -PI*300;
+	pozycja_kadlub = -PI * 300;
 }
+
+
 
 void Tank::draw(ShaderProgram* sp,glm::mat4 M)
 {
@@ -21,17 +27,17 @@ void Tank::draw(ShaderProgram* sp,glm::mat4 M)
 	glm::mat4 HM = glm::translate(M, glm::vec3(0.0f, cos(progres_animacji_kdlub * tempo_animacji_kadlub) / 400, 0.0f));
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(HM));
 
-	hull.draw(sp);
+	hull->draw(sp);
 
 	glm::mat4 TM = glm::translate(M, glm::vec3(sin(progres_animacji_tracks * tempo_animacji_poziom)/100, cos(progres_animacji_tracks * tempo_animacji_pion)/300, 0.0f)); //animacja tracks
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(TM));
-	tracks.draw(sp);
+	tracks->draw(sp);
 
 	M = glm::rotate(M, pozycja_wieza, glm::vec3(0.0f, 1.0f, 0.0f));
 	M = glm::translate(M, glm::vec3(-0.2f, 0.0f, 0.0f)); // lekka poprawa osi obrotu
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
-	turret.draw(sp);
+	turret->draw(sp);
 }
 
 void Tank::update(float czas,bool czy_anim_tracks)

@@ -342,24 +342,24 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 	tex0 = readTexture("models\\Tank\\turret.png");
 	r = load("models\\Tank\\TurretT.obj");
-	obj3d tank_turret(r[0], r[2], r[1], *r[3], tex0);
+	obj3d *tank_turret= new obj3d(r[0], r[2], r[1], *r[3], tex0);
 	
 	tex0 = readTexture("models\\Tank\\enemyTex\\turret_enemy.png");
-	obj3d tank_turret_red(r[0], r[2], r[1], *r[3], tex0);
+	obj3d *tank_turret_red = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 
 	tex0 = readTexture("models\\Tank\\hull.png");
 	r = load("models\\Tank\\HullT.obj");
-	obj3d tank_hull(r[0], r[2], r[1], *r[3], tex0);
+	obj3d *tank_hull = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 
 	tex0 = readTexture("models\\Tank\\enemyTex\\hull_enemy.png");
-	obj3d tank_hull_red(r[0], r[2], r[1], *r[3], tex0);
+	obj3d *tank_hull_red = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 
 	tex0 = readTexture("models\\Tank\\tracks.png");
 	r = load("models\\Tank\\TracksT.obj");
-	obj3d tank_tracks(r[0], r[2], r[1], *r[3], tex0);
+	obj3d *tank_tracks = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 
 	tex0 = readTexture("models\\Tank\\enemyTex\\tracks_enemy.png");
-	obj3d tank_tracks_red(r[0], r[2], r[1], *r[3], tex0);
+	obj3d *tank_tracks_red = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 
 	t = new Tank(tank_turret, tank_hull, tank_tracks);
 	te = new Tank(tank_turret_red, tank_hull_red, tank_tracks_red);

@@ -12,9 +12,10 @@
 
 class Tank
 {
-	obj3d turret;
-	obj3d hull;
-	obj3d tracks;
+	obj3d* turret;
+	obj3d* hull; //warto zamienic na wskazniki
+	obj3d* tracks;
+
 	float pozycja_wieza; // obrot wiezy
 	float pozycja_kadlub; // obrot kadluba
 
@@ -24,8 +25,10 @@ class Tank
 
 public:
 
+
+
 	Tank();
-	Tank(obj3d turret_obj, obj3d hull_obj, obj3d tracks_obj);
+	Tank(obj3d *turret_obj, obj3d *hull_obj, obj3d *tracks_obj);
 
 	void draw(ShaderProgram* sp,glm::mat4 M);
 	void update(float czas, bool czy_anim_tracks);

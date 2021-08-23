@@ -29,9 +29,10 @@ void Gra::create_game()
 
 
 	//tworzenie przeszkod
+	
 	int los_x = rand() % rozmiar_mapy;
 	int los_y = rand() % rozmiar_mapy;
-
+	
 	for (int i = 0; i < 10; i++) {
 
 		while (flagi_blokady_pola[los_x][los_y] != 0) {
@@ -43,7 +44,7 @@ void Gra::create_game()
 
 		przeszkody.push_back(new Obstacle(modele_przeskod->operator[](rand() % modele_przeskod->size()),wspolzedne(los_x*2,los_y*2)));
 	}
-
+	
 	//tworzenie przeciwnikow
 	los_x = rand() % rozmiar_mapy;
 	los_y = rand() % rozmiar_mapy;
@@ -57,7 +58,12 @@ void Gra::create_game()
 
 		flagi_blokady_pola[los_x][los_y] = 2;
 
-		przeciwnicy.push_back(new Enemy(enemy_tank,wspolzedne(los_x,los_y)));
+		przeciwnicy.push_back(new Enemy(*enemy_tank,wspolzedne(los_x,los_y)));
+	}
+
+	for (int i = 0; i < przeciwnicy.size(); i++)
+	{
+		przeciwnicy[i]->set_pozycja_gracza_pointer(&pozycja_gracza);
 	}
 }
 
