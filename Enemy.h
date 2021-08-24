@@ -15,6 +15,7 @@ class Enemy
 	std::vector<std::vector<int>> *flagi_blokady_pola;
 
 	bool flag_czy_ruch = false;
+	bool flag_czy_obrot = false;
 	wspolzedne* gdzie_ruch = nullptr;
 
 

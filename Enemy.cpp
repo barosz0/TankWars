@@ -172,6 +172,7 @@ void Enemy::szukaj_drogi()
 	if (odle[xs][ys] == 0)
 	{
 		flag_czy_ruch = false;
+		flag_czy_obrot = false;
 		gdzie_ruch = nullptr;
 		return;
 	}
@@ -222,6 +223,7 @@ void Enemy::szukaj_drogi()
 
 	if (min != -1) {
 		flag_czy_ruch = true;
+		flag_czy_obrot = true;
 		gdzie_ruch = pom;
 	}
 }
@@ -235,9 +237,52 @@ void Enemy::update(float czas)
 		szukaj_drogi();
 	}
 
-	if (flag_czy_ruch)
+
+	if (flag_czy_obrot)
 	{
-		//std::cout << pozycja.x << " | " << gdzie_ruch->x << "\n";
+		float a = (pozycja.y - gdzie_ruch->y) / (pozycja.x - gdzie_ruch->x);
+		float d = atan(a) + PI / 2;
+
+
+		float kierunek_patrzenia = fmod(abs(tank_model.get_pozycja_kadlub()), 2 * PI);
+
+		//if (kierunek_patrzenia < 0)kierunek_patrzenia *= -1;
+		if (pozycja.x < gdzie_ruch->x) d += PI;
+
+		float odl = abs(d - kierunek_patrzenia);
+		float odl_przez_0 = 2 * PI - abs(d - kierunek_patrzenia);
+
+		if (abs(kierunek_patrzenia - d) > 0.02) // unikamy niepotrzebnego ruchu lewo prawo kiedy gracz jest ju¿ namierzony
+			if (odl_przez_0 < odl)
+			{
+				if (kierunek_patrzenia > d)
+				{
+					tank_model.obroc_kadlub(-czas * (PI / 2));
+				}
+				else
+				{
+					tank_model.obroc_kadlub(czas * (PI / 2));
+				}
+			}
+			else
+			{
+				if (kierunek_patrzenia < d)
+				{
+					tank_model.obroc_kadlub(-czas * (PI / 2));
+				}
+				else
+				{
+					tank_model.obroc_kadlub(czas * (PI / 2));
+				}
+			}
+		else
+		{
+			flag_czy_obrot = false;
+		}
+	}
+	else if (flag_czy_ruch)
+	{
+
 		float przebyty_dystans = czas * PI / 2;
 
 		if(pozycja.x == gdzie_ruch->x&& pozycja.y == gdzie_ruch->y)
