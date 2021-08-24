@@ -58,12 +58,22 @@ void Gra::create_game()
 
 		flagi_blokady_pola[los_x][los_y] = 2;
 
-		przeciwnicy.push_back(new Enemy(*enemy_tank,wspolzedne(los_x,los_y)));
+		przeciwnicy.push_back(new Enemy(*enemy_tank,wspolzedne(los_x*2,los_y*2)));
 	}
 
 	for (int i = 0; i < przeciwnicy.size(); i++)
 	{
 		przeciwnicy[i]->set_pozycja_gracza_pointer(&pozycja_gracza);
+		przeciwnicy[i]->set_flagi_blokady_pola(&flagi_blokady_pola);
+	}
+
+	for (int i = 0; i < rozmiar_mapy; i++)
+	{
+		for (int j = 0; j < rozmiar_mapy; j++)
+		{
+			std::cout << flagi_blokady_pola[i][j] << " ";
+		}
+		std::cout << "\n";
 	}
 }
 
@@ -152,6 +162,7 @@ void Gra::draw_enemy(ShaderProgram* sp, glm::mat4 M)
 
 void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
 {
+	//std::cout << pozycja_gracza.x << " | " << pozycja_gracza.y << "\n";
 	if (speed_kam < 0)
 		speed_kadlub*= (-1);
 
@@ -225,8 +236,8 @@ void Gra::rusz_gracza(float dystans)
 	if (pomX < -0.5)pomX = -0.5;
 	if (pomY < -0.5)pomY = -0.5;
 
-	if (pomX > rozmiar_mapy * 2-1.5)pomX = rozmiar_mapy * 2-1.5;
-	if (pomY > rozmiar_mapy * 2-1.5)pomY = rozmiar_mapy * 2-1.5;
+	if (pomX > rozmiar_mapy * 2-1.6)pomX = rozmiar_mapy * 2-1.6;
+	if (pomY > rozmiar_mapy * 2-1.6)pomY = rozmiar_mapy * 2-1.6;
 
 	bool kolizja = false;
 	wspolzedne pomW(pomX,pomY);
