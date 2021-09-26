@@ -19,5 +19,9 @@ public:
 	void draw(ShaderProgram* sp);
 	void set_texture(GLuint t);
 
+	float* get_vertices();
+	float* get_normals();
+	float* get_texCoords();
+	int get_vertexCount();
 };
 

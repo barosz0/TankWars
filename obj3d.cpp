@@ -61,3 +61,23 @@ void obj3d::set_texture(GLuint t)
 	texture = t;
 }
 
+float* obj3d::get_vertices()
+{
+	return vertices;
+
+}
+
+float* obj3d::get_normals()
+{
+	return normals;
+}
+
+float* obj3d::get_texCoords()
+{
+	return texCoords;
+}
+
+int obj3d::get_vertexCount()
+{
+	return vertexCount;
+}

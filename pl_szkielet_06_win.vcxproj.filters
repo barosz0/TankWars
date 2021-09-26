@@ -45,6 +45,21 @@
     <ClInclude Include="Enemy.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEffect.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEffect_Manager.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEffect_Creator.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleGroup.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lodepng.cpp">
@@ -71,12 +86,39 @@
     <ClCompile Include="Enemy.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEffect.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEffect_Manager.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEffect_Creator.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleGroup.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="f_simplest.glsl">
       <Filter>Pliki zasobów</Filter>
     </None>
     <None Include="v_simplest.glsl">
+      <Filter>Pliki zasobów</Filter>
+    </None>
+    <None Include="v_Particle.glsl">
+      <Filter>Pliki zasobów</Filter>
+    </None>
+    <None Include="f_Particle.glsl">
+      <Filter>Pliki zasobów</Filter>
+    </None>
+    <None Include="f_logo.glsl">
+      <Filter>Pliki zasobów</Filter>
+    </None>
+    <None Include="v_logo.glsl">
       <Filter>Pliki zasobów</Filter>
     </None>
   </ItemGroup>

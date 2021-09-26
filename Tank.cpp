@@ -33,7 +33,7 @@ void Tank::draw(ShaderProgram* sp,glm::mat4 M)
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(TM));
 	tracks->draw(sp);
 
-	M = glm::rotate(M, pozycja_wieza, glm::vec3(0.0f, 1.0f, 0.0f));
+	M = glm::rotate(M, pozycja_wieza, glm::vec3(0.0f, 2.0f, 0.0f));
 	M = glm::translate(M, glm::vec3(-0.2f, 0.0f, 0.0f)); // lekka poprawa osi obrotu
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 

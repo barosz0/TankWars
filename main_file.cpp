@@ -42,10 +42,11 @@ Place, Fifth Floor, Boston, MA  02110 - 1301  USA
 #include "Tank.h"
 #include "obj3d.h"
 #include "Gra.h"
+#include "ParticleEffect_Manager.h"
 
 
 
-
+bool shoot = false;
 float speed_x=0;
 float speed_y=0;
 float speed_kamera = 0;
@@ -57,6 +58,7 @@ float speed_k = 0; // obrot kadlub
 
 ShaderProgram *sp;
 ShaderProgram *SkyboxShader;
+ShaderProgram* particleShader;
 
 using namespace std;
 
@@ -95,7 +97,46 @@ int vertexCount = myCubeVertexCount;
 //float* colors = myTeapotColors;
 //int vertexCount = myTeapotVertexCount;
 
+float losuj_os_x_dym(std::default_random_engine &generator)
+{
+	std::normal_distribution<double> distribution(0.0, 1);
 
+	return distribution(generator)*0.1;
+}
+
+float losuj_os_y_dym(std::default_random_engine &generator)
+{
+	std::normal_distribution<double> distribution(0.0, 1);
+
+	return distribution(generator) * 0.1;
+}
+
+float losuj_os_z_dym(std::default_random_engine &generator)
+{
+	std::normal_distribution<double> distribution(0.0, 1);
+
+	return abs(distribution(generator)) * 2;
+}
+
+float losuj_czas_dym(std::default_random_engine &generator)
+{
+	std::normal_distribution<double> distribution(0.5, 0.1);
+
+	return 0.5f;//abs(distribution(generator));
+}
+
+float losuj_os_y_angel(std::default_random_engine& generator)
+{
+	std::normal_distribution<double> distribution(4, 1);
+
+	return abs(distribution(generator));
+}
+
+float losuj_czas_angel(std::default_random_engine& generator)
+{
+
+	return 6.0f;
+}
 
 vector<float*> load(string fn)
 {
@@ -292,6 +333,8 @@ void keyCallback(GLFWwindow* window,int key,int scancode,int action,int mods) {
 		if (key == GLFW_KEY_W) speed_kamera += PI / 2;
 		if (key == GLFW_KEY_S) speed_kamera -= PI / 2;
 
+		if (key == GLFW_KEY_SPACE) shoot = true;
+
     }
     if (action==GLFW_RELEASE) {
         if (key==GLFW_KEY_LEFT) speed_x=0;
@@ -310,6 +353,8 @@ void keyCallback(GLFWwindow* window,int key,int scancode,int action,int mods) {
 		// ruch przod tyl
 		if (key == GLFW_KEY_W) speed_kamera -= PI / 2;
 		if (key == GLFW_KEY_S) speed_kamera += PI / 2;
+
+		if (key == GLFW_KEY_SPACE) shoot = false;
     }
 }
 
@@ -317,6 +362,91 @@ void windowResizeCallback(GLFWwindow* window,int width,int height) {
     if (height==0) return;
     aspectRatio=(float)width/(float)height;
     glViewport(0,0,width,height);
+}
+
+void draw_logo()
+{
+	ShaderProgram* spL = new ShaderProgram("v_logo.glsl", NULL, "f_logo.glsl");
+	float aspectRatio = 1;
+
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	spL->use();
+
+
+	GLuint loadtex = readTexture("Textures\\LoadScreen.png");
+
+
+	int rozmiarX = 1920, rozmiarY = 900;
+
+	float proporcja = rozmiarX / (float)rozmiarY;
+
+	rozmiarX = 1*proporcja;
+	rozmiarY = 1;
+
+
+
+
+	float vertex[] =
+	{	-rozmiarX,-rozmiarY, //prawy dolny
+		-rozmiarX,rozmiarY, // prawy gorny
+		rozmiarX,-rozmiarY, // lewy dolny
+		rozmiarX,rozmiarY // lewy gorny
+	};
+
+	glEnableVertexAttribArray(spL->a("vertex"));
+	glVertexAttribPointer(spL->a("vertex"), 2, GL_FLOAT, false, 0, vertex);
+
+
+
+
+	float texCoords[] =
+	{
+		0,1,
+		0,0,
+		1,1,
+		1,0
+	};
+
+	glEnableVertexAttribArray(spL->a("texCoord0"));
+	glVertexAttribPointer(spL->a("texCoord0"), 2, GL_FLOAT, false, 0, texCoords);
+
+	glUniform1i(spL->u("textureMap0"), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, loadtex);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisableVertexAttribArray(spL->a("vertex"));
+	glDisableVertexAttribArray(spL->a("texCoord0"));
+
+
+	delete spL;
+
+
+}
+
+vector<pair<int, int>> read_font_offset(string name)
+{
+	std::fstream file(name);
+	string linia;
+
+	vector<pair<int, int>> v;
+	v.resize(10);
+
+	int offset, size, id;
+
+	while (getline(file, linia))
+	{
+		istringstream ss(linia);
+		ss >> id >> offset >> size;
+		if (id >= 0)
+		{
+			v[id] = make_pair(offset, size);
+		}
+	}
+
+	return v;
 }
 
 //Procedura inicjująca
@@ -327,6 +457,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 	tex1 = readTexture("sky.png");
 	glClearColor(0,0,0,1);
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 	glfwSetWindowSizeCallback(window,windowResizeCallback);
 	glfwSetKeyCallback(window,keyCallback);
 
@@ -335,6 +470,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 	//tex0 = readTexture("models\\1.png");
 	//load("models\\1t.obj");
+	
+	draw_logo();
+	glfwSwapBuffers(window);
+
+
 
 	vector<float*> r;
 	
@@ -392,27 +532,80 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 	przeszkody->push_back(pom_obj);
 
+	//ladowanie efektow czasteczkowych
+
+
+	ParticleEffect_Manager* PEM = new ParticleEffect_Manager;
+
+	//smoke
+	PEM->create_effect("shoot_effect");
+
+	ParticleEffect_Creator* smoke = PEM->access_effect("shoot_effect");
+	ParticleGroup* smoke_p = new ParticleGroup();//smoke->modelowa_pointer();
+	smoke_p->set_liczba_czasteczek(1000);
+	smoke_p->set_rozmiar_czasteczek(0.5);
 	
+	tex0 = readTexture("Textures\\smoke_texture.png");
+	smoke_p->set_texture(tex0,12,7);
 
-	/*tex0 = readTexture("models\\SkyBox\\Tex.png");
-	r = load("models\\SkyBox\\Skybox.obj");
-	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);*/
+	smoke_p->set_alpha_channel(true);
+	smoke_p->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));//set_scale(glm::vec3(1.0f, 1.0f, 1.0f));//
 
 
-	
+	smoke->set_modelowa(*smoke_p);
+	smoke->set_x_axi_generator(&losuj_os_x_dym);
+	smoke->set_y_axi_generator(&losuj_os_y_dym);
+	smoke->set_z_axi_generator(&losuj_os_z_dym);
+	smoke->set_time_generator(&losuj_czas_dym);
+
+	//angel
+
+	PEM->create_effect("dead");
+	ParticleEffect_Creator* dead = PEM->access_effect("dead");
+	ParticleGroup* dead_p = new ParticleGroup();
+	dead_p->set_liczba_czasteczek(1);
+	dead_p->set_rozmiar_czasteczek(1);
+
+	tex0 = readTexture("Textures\\angel1.png");
+	dead_p->set_texture(tex0, 1, 1);
+	dead_p->set_alpha_channel(true);
+
+	dead->set_modelowa(*dead_p);
+	dead->set_y_axi_generator(&losuj_os_y_angel);
+	dead->set_time_generator(&losuj_czas_angel);
+
+	//interface
+
+	Interface *UI = new Interface;
+	tex0 = readTexture("Textures\\ammo.png");
+	UI->set_tex_ammo(tex0);
+	tex0 = readTexture("Textures\\hearts.png");
+	UI->set_tex_hearts(tex0);
+	tex0 = readTexture("Textures\\Font\\PixelNumbers.png");
+	UI->set_tex_numbers(tex0, read_font_offset("Textures\\Font\\PixelNumbers.f"),419);
+	tex0 = readTexture("Textures\\crosshair2.png");
+	UI->set_tex_crosshair(tex0);
+	sp = new ShaderProgram("v_logo.glsl", NULL, "f_logo.glsl");
+	UI->set_shader(sp);
+	main_game->set_interface(UI);
 
 
 	sp = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
 	SkyboxShader = new ShaderProgram("skybox.vs", NULL, "skybox.fs");
 	unsigned int SkyboxTexture = loadSkybox();
 
+	particleShader = new ShaderProgram("v_Particle.glsl", NULL, "f_Particle.glsl");
+
 	//Wypełnianie Gry
 	main_game->set_modele_przeszkod(przeszkody);
 	main_game->set_player_tank(t);
 	main_game->set_enemy_tank(te);
 	main_game->set_mainShader(sp);
+	main_game->set_particleShader(particleShader);
+	main_game->set_particle_manager(PEM);
 
 	main_game->create_game();
+
 }
 
 
@@ -551,13 +744,14 @@ int main(void)
 		//global_M_main = glm::translate(global_M_main, glm::vec3(sin(t->get_pozycja_kadlub()) * czas * speed_kamera,0.0f, 0.0f));
 		//main_game->set_M_main(global_M_main);
 
-		main_game->update(czas, speed_kamera, speed_w, speed_k);
+		main_game->update(czas, speed_kamera, speed_w, speed_k, shoot);
 
         glfwSetTime(0); //Zeruj timer
 
 		main_game->drawScene(window, t->get_pozycja_wieza() + t->get_pozycja_kadlub());
 		//drawScene(window,angle_x,angle_y,t->get_pozycja_wieza()+t->get_pozycja_kadlub()); //Wykonaj procedurę rysującą
 		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
+
 	}
 
 	freeOpenGLProgram(window);

@@ -22,26 +22,40 @@
     <ClInclude Include="constants.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Gra.h" />
+    <ClInclude Include="Interface.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="myCube.h" />
     <ClInclude Include="myTeapot.h" />
     <ClInclude Include="obj3d.h" />
     <ClInclude Include="Obstacle.h" />
+    <ClInclude Include="ParticleEffect.h" />
+    <ClInclude Include="ParticleEffect_Creator.h" />
+    <ClInclude Include="ParticleEffect_Manager.h" />
+    <ClInclude Include="ParticleGroup.h" />
     <ClInclude Include="shaderprogram.h" />
     <ClInclude Include="Tank.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Gra.cpp" />
+    <ClCompile Include="Interface.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main_file.cpp" />
     <ClCompile Include="obj3d.cpp" />
     <ClCompile Include="Obstacle.cpp" />
+    <ClCompile Include="ParticleEffect.cpp" />
+    <ClCompile Include="ParticleEffect_Creator.cpp" />
+    <ClCompile Include="ParticleEffect_Manager.cpp" />
+    <ClCompile Include="ParticleGroup.cpp" />
     <ClCompile Include="shaderprogram.cpp" />
     <ClCompile Include="Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="f_logo.glsl" />
+    <None Include="f_Particle.glsl" />
     <None Include="f_simplest.glsl" />
+    <None Include="v_logo.glsl" />
+    <None Include="v_Particle.glsl" />
     <None Include="v_simplest.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

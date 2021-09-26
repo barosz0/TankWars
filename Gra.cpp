@@ -19,6 +19,9 @@ Gra::Gra(obj3d *z)
 
 void Gra::create_game()
 {
+	int liczba_przeszkod = 1;
+	int liczba_przeciwnikow = 1;
+
 	//tworzenie tablicy flag zajecia pola
 	flagi_blokady_pola.resize(rozmiar_mapy);
 	for (int i = 0; i < rozmiar_mapy; i++)
@@ -33,7 +36,7 @@ void Gra::create_game()
 	int los_x = rand() % rozmiar_mapy;
 	int los_y = rand() % rozmiar_mapy;
 	
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < liczba_przeszkod; i++) {
 
 		while (flagi_blokady_pola[los_x][los_y] != 0) {
 			los_x = rand() % rozmiar_mapy;
@@ -49,7 +52,7 @@ void Gra::create_game()
 	los_x = rand() % rozmiar_mapy;
 	los_y = rand() % rozmiar_mapy;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < liczba_przeciwnikow; i++) {
 
 		while (flagi_blokady_pola[los_x][los_y] != 0) {
 			los_x = rand() % rozmiar_mapy;
@@ -65,6 +68,7 @@ void Gra::create_game()
 	{
 		przeciwnicy[i]->set_pozycja_gracza_pointer(&pozycja_gracza);
 		przeciwnicy[i]->set_flagi_blokady_pola(&flagi_blokady_pola);
+		przeciwnicy[i]->set_particle_manager(particle_manager);
 	}
 
 	for (int i = 0; i < rozmiar_mapy; i++)
@@ -75,6 +79,13 @@ void Gra::create_game()
 		}
 		std::cout << "\n";
 	}
+	
+
+	//gracz
+	shoot_cooldown = 0;
+	ilosc_ammo = 50;
+	ilosc_hp = 6;
+	player_dead_animation_progres = 0;
 }
 
 void Gra::draw_map(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
@@ -160,15 +171,36 @@ void Gra::draw_enemy(ShaderProgram* sp, glm::mat4 M)
 	}
 }
 
-void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
+void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kadlub, bool shoot) // do dodania mapa z flagami predkosci albo obsluga klawiczy w Gra
 {
-	//std::cout << pozycja_gracza.x << " | " << pozycja_gracza.y << "\n";
+	//effect czasteczkowy
+	particle_manager->update(czas);
+
+
+	if (ilosc_hp <= 0)
+	{
+		player_dead_animation_progres += czas*0.2;
+		return;
+	}
+
+
+	if (shoot && shoot_cooldown < 0 && ilosc_ammo>0) {
+		particle_manager->start_effect("shoot_effect", glm::vec3(pozycja_gracza.x, 0.0f, pozycja_gracza.y), -(player_tank->get_pozycja_wieza() + player_tank->get_pozycja_kadlub()));
+		player_oddaj_strzal();
+		shoot_cooldown = 1;
+		ilosc_ammo--;
+		
+	}
+
+	if(shoot_cooldown>=0)
+		shoot_cooldown -= czas;
+
 	if (speed_kam < 0)
 		speed_kadlub*= (-1);
 
-	player_tank->obroc_wierze(czas * speed_wierza);  //do przeniesienia do update
-	player_tank->obroc_kadlub(czas * speed_kadlub);  //do przeniesienia do update
 
+	player_tank->obroc_wierze(czas * speed_wierza);
+	player_tank->obroc_kadlub(czas * speed_kadlub);
 
 
 	//rusz_gracza(czas * speed_kam);
@@ -180,16 +212,29 @@ void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kad
 	else
 		player_tank->update(czas, 0);
 	
+	int *damage = new int(0);
+
 	for (int i = 0; i < przeciwnicy.size(); i++)
 	{
-		przeciwnicy[i]->update(czas);
+		przeciwnicy[i]->update(czas,damage);
 	}
+	ilosc_hp -= *damage;
+
+	//smierc gracza
+	if (ilosc_hp <= 0)
+	{
+		particle_manager->start_effect("dead", glm::vec3(pozycja_gracza.x, 0.0f, pozycja_gracza.y), 0);
+	}
+
+
+
+
 }
 
 void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 {
 	float aspectRatio = 1; //do sprawdzenia czy potrzebne
-
+	
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -215,13 +260,27 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 
 	M = glm::translate(M, glm::vec3(0.0f, -0.8f, 0.0f));
 
-	draw_map(mainShader, M); // do potencjalnego scalenia
+	draw_map(mainShader, M);
 	draw_enemy(mainShader, M);
 
 	glm::mat4 TM = glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)); // macierz czo³gu
 	TM = glm::translate(TM, glm::vec3(0.0f, -2.4f, 0.0f));
+	TM = glm::translate(TM, glm::vec3(0.0f, -player_dead_animation_progres, 0.0f));
 
 	player_tank->draw(mainShader, TM);
+
+	particleShader->use();
+
+	glUniformMatrix4fv(particleShader->u("P"), 1, false, glm::value_ptr(P));
+	glUniformMatrix4fv(particleShader->u("V"), 1, false, glm::value_ptr(V));
+
+
+	glm::mat4 PM = glm::mat4(1.0f);
+
+	PM = glm::translate(PM, glm::vec3(-pozycja_gracza.x, 0.0f, -pozycja_gracza.y));
+
+	particle_manager->draw(particleShader, PM);
+	UI->draw_interface(ilosc_hp, ilosc_ammo);
 
 	glfwSwapBuffers(window); //Przerzuæ tylny bufor na przedni
 }
@@ -248,34 +307,91 @@ void Gra::rusz_gracza(float dystans)
 			return;
 	}
 
-	//wersja z funkcjia w obiekcie przeszkody
-	/*do {
-		kolizja = false;
-		int i;
-		for (i = 0; i < przeszkody.size(); i++)
-		{
-			if (kolizja = przeszkody[i]->czy_kolizja(pomW))
-				return;
-				//break;
-		}
-		if (kolizja)
-		{
-			pomW=przeszkody[i]->rozwiaz_kolizje(pozycja_gracza, pomW, 3);
-		}
-
-	} while (kolizja);
-	*/
 	pozycja_gracza = pomW;
-
-	//pozycja_gracza.x = pomX;
-	//pozycja_gracza.y = pomY;
-	//std::cout << pozycja_gracza.x << " | " << pozycja_gracza.y << std::endl;
 	
 }
+
+void Gra::player_oddaj_strzal()
+{
+	//dziala... chyba dziala...
+
+	float kierunek_lufy = player_tank->get_pozycja_kadlub() + player_tank->get_pozycja_wieza();//+PI/2;
+	float a = tan(kierunek_lufy);
+	float b = pozycja_gracza.x - a * pozycja_gracza.y;
+
+	std::vector<Enemy*> trafienie;
+
+	for (int i = 0; i < przeciwnicy.size(); i++)
+	{
+		float odl = abs(a * przeciwnicy[i]->get_pozycja().y - przeciwnicy[i]->get_pozycja().x + b) / sqrt(a * a + 1);
+		std::cout << odl << std::endl;
+		if (odl < 1) 
+		{
+
+			float xc = sin(player_tank->get_pozycja_kadlub() + player_tank->get_pozycja_wieza());
+			float yc = cos(player_tank->get_pozycja_kadlub() + player_tank->get_pozycja_wieza());
+
+			std::cout << "TEST\n";
+			std::cout << pozycja_gracza.x << " " << pozycja_gracza.y << "\n";
+			std::cout << przeciwnicy[i]->get_pozycja().x << " " << przeciwnicy[i]->get_pozycja().y << "\n";
+
+			std::cout << "x = " << xc << " y = " << yc <<"\n";
+
+			if (xc > 0 && pozycja_gracza.x > przeciwnicy[i]->get_pozycja().x) {
+				std::cout << "1 to ja\n";
+				continue;
+			}
+
+			if (xc < 0 && pozycja_gracza.x < przeciwnicy[i]->get_pozycja().x) {
+				std::cout << "2 to ja\n";
+				continue;
+			}
+
+			if (yc > 0 && pozycja_gracza.y > przeciwnicy[i]->get_pozycja().y) {
+				std::cout << "3 to ja\n";
+				continue;
+			}
+
+			if (yc < 0 && pozycja_gracza.y < przeciwnicy[i]->get_pozycja().y) {
+				std::cout << "4 to ja\n";
+				continue;
+			}
+
+			trafienie.push_back(przeciwnicy[i]);
+			//std::cout << "trafienie" << std::endl;
+			//przeciwnicy[i]->trafiony(1);
+
+		}
+			
+	}
+
+	float min = -1;
+	int v = -1;
+
+	for (int i = 0; i < trafienie.size(); i++)
+	{
+		float odl = pow(pozycja_gracza.x - trafienie[i]->get_pozycja().x, 2) + pow(pozycja_gracza.y - trafienie[i]->get_pozycja().y, 2);
+		if (min = -1|| odl < min)
+		{
+			v = i;
+			min = odl;
+		}
+	}
+
+	if (v >= 0)
+		trafienie[v]->trafiony(1);
+
+}
+
 
 void Gra::set_mainShader(ShaderProgram* sp)
 {
 	mainShader = sp;
+}
+
+void Gra::set_particleShader(ShaderProgram* sp)
+{
+	particleShader = sp;
 }
 
 
@@ -304,4 +420,14 @@ void Gra::set_rozmiar_mapy(int r)
 void Gra::set_modele_przeszkod(std::vector<obj3d*>* mp)
 {
 	modele_przeskod = mp;
+}
+
+void Gra::set_particle_manager(ParticleEffect_Manager* pm)
+{
+	particle_manager = pm;
+}
+
+void Gra::set_interface(Interface* i) 
+{
+	UI = i;
 }

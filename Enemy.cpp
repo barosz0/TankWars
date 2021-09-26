@@ -1,19 +1,27 @@
 #include "Enemy.h"
 Enemy::Enemy()
 {
-
+	shoot_cooldown = 0;
+	hp_enemy = 1;
+	dead_animation_progress = 0;
+	flag_czy_widac_gracza = false;
 }
 
 Enemy::Enemy(Tank t, wspolzedne p)
 {
+	shoot_cooldown = 0;
+	hp_enemy = 1;
+	dead_animation_progress = 0;
+	flag_czy_widac_gracza = false;
 	tank_model = t;
 	pozycja = p;
-	//tank_model.set_pozycja_wieza(-1000);
 }
 
 void Enemy::draw(ShaderProgram* sp, glm::mat4 M)
 {
 	glm::mat4 pom_M = glm::translate(M, glm::vec3(pozycja.x, 0.0f, pozycja.y));
+
+	pom_M = glm::translate(pom_M, glm::vec3(0.0f, -dead_animation_progress, 0.0f));
 
 	pom_M = glm::scale(pom_M, glm::vec3(0.5, 0.5, 0.5));
 
@@ -69,17 +77,6 @@ void Enemy::szukaj_drogi()
 
 	int xd = round(pozycja_gracza->x / 2);
 	int yd = round(pozycja_gracza->y / 2);
-	std::cout << xd << " | " << yd << "\n"; 
-
-	/*
-	int xs = round(pozycja_gracza->x / 2);
-	int ys = round(pozycja_gracza->y / 2);
-
-	int xd = pozycja.x / 2;
-	int yd = pozycja.y / 2;
-	*/
-	//std::cout<< fb[xd][yd] <<"\n";
-	
 	
 
 	//Problem jak gracz jest na polu z przeszkoda
@@ -210,16 +207,6 @@ void Enemy::szukaj_drogi()
 
 	odle[xs][ys] = -1;
 
-	//debug
-	for (int i = 0; i < odle.size(); i++)
-	{
-		for (int j = 0; j < odle.size(); j++)
-		{
-			std::cout << odle[i][j] << " ";
-		}
-		std::cout << "\n";
-	}
-	//debug
 
 	if (min != -1) {
 		flag_czy_ruch = true;
@@ -228,16 +215,68 @@ void Enemy::szukaj_drogi()
 	}
 }
 
-void Enemy::update(float czas)
+void Enemy::update(float czas, int* damage)
 {
-	//poruszanie siê w kierunku gracza
+	if (hp_enemy > 0)
+	{
+		if (shoot_cooldown > 0)
+			shoot_cooldown -= czas;
 
+		if (shoot_cooldown <= 0 && flag_czy_widac_gracza)
+		{
+			//warto tu dodac prawdopodobienstwo strzalu
+			if (oddaj_strzal())
+				*damage += 1;
+		}
+
+		_update_ruch_tank(czas);
+
+		_update_obrot_wierzy(czas);
+
+		tank_model.update(czas, flag_czy_ruch);
+	}
+	else
+	{
+		if(dead_animation_progress<10)
+			dead_animation_progress += czas*0.5;
+	}
+}
+
+void Enemy::trafiony(int dam)
+{
+	hp_enemy -= dam;
+	if (hp_enemy <= 0)
+	{
+		if(dead_animation_progress==0)
+			particle_manager->start_effect("dead", glm::vec3(pozycja.x, 0.0f, pozycja.y), 0);
+	}
+}
+
+
+bool Enemy::oddaj_strzal()
+{
+	
+	glm::vec3 kierunek_lufy = glm::vec3(sin(tank_model.get_pozycja_kadlub() + tank_model.get_pozycja_wieza()), 0.0f,
+		cos(tank_model.get_pozycja_kadlub() + tank_model.get_pozycja_wieza()));
+
+	glm::vec3 czubek_lufy = kierunek_lufy * 0.7f; // odleglosc lufy od osi obrotu
+
+	particle_manager->start_effect("shoot_effect", glm::vec3(pozycja.x, -0.2f, pozycja.y) + czubek_lufy,
+		-(tank_model.get_pozycja_kadlub() + tank_model.get_pozycja_wieza()));
+
+	shoot_cooldown = 2;
+
+	return true;
+}
+
+void Enemy::_update_ruch_tank(float czas)
+{
 	if (!flag_czy_ruch)
 	{
-		szukaj_drogi();
+		//szukaj_drogi();
 	}
 
-
+	//poruszanie siê w kierunku gracza
 	if (flag_czy_obrot)
 	{
 		float a = (pozycja.y - gdzie_ruch->y) / (pozycja.x - gdzie_ruch->x);
@@ -252,7 +291,7 @@ void Enemy::update(float czas)
 		float odl = abs(d - kierunek_patrzenia);
 		float odl_przez_0 = 2 * PI - abs(d - kierunek_patrzenia);
 
-		if (abs(kierunek_patrzenia - d) > 0.02) // unikamy niepotrzebnego ruchu lewo prawo kiedy gracz jest ju¿ namierzony
+		if (abs(kierunek_patrzenia - d) > 0.02)
 			if (odl_przez_0 < odl)
 			{
 				if (kierunek_patrzenia > d)
@@ -285,7 +324,7 @@ void Enemy::update(float czas)
 
 		float przebyty_dystans = czas * PI / 2;
 
-		if(pozycja.x == gdzie_ruch->x&& pozycja.y == gdzie_ruch->y)
+		if (pozycja.x == gdzie_ruch->x && pozycja.y == gdzie_ruch->y)
 		{
 			std::cout << "error ruch w nie odpowiednim kierunku\n";
 		}
@@ -309,7 +348,7 @@ void Enemy::update(float czas)
 				}
 			}
 		}
-		else if(pozycja.y == gdzie_ruch->y) // ruch w x
+		else if (pozycja.y == gdzie_ruch->y) // ruch w x
 		{
 			float odl = gdzie_ruch->x - pozycja.x;
 			if (przebyty_dystans > abs(odl))
@@ -329,30 +368,47 @@ void Enemy::update(float czas)
 				}
 			}
 		}
-		
+
 	}
+}
 
-
-	// patrzenie na gracza
+void Enemy::_update_obrot_wierzy(float czas)
+{
 
 	//obracanie wierzy
 	//jest "ma³y" problem kiedy wartosc obrotu wierzy wejdzie na plus
 	//warto naprawic jednak w tym momencie stanie sie to dopiero po okolo 150 obrotach w odpowiednia strone
 	//zmiana znakow psuje wyznaczanie kierunku
 
-	float a = (pozycja.y - pozycja_gracza->y) / (pozycja.x - pozycja_gracza->x);
-	float d = atan(a)+PI/2;
+	float odleglosc_strzelania = 36; // odleglosc na jaka przeciwnicy maja namierzac i strzelac w gracza
 
 
-	float kierunek_patrzenia = fmod(abs(tank_model.get_pozycja_wieza() + tank_model.get_pozycja_kadlub()),2*PI);
+	float odleglosc_od_gracza = pow((pozycja_gracza->x - pozycja.x), 2) + pow((pozycja_gracza->y - pozycja.y), 2);
 	
+	//std::cout << odleglosc_od_gracza << std::endl;
+
+
+
+	float a = (pozycja.y - pozycja_gracza->y) / (pozycja.x - pozycja_gracza->x);
+	float d = atan(a) + PI / 2;
+
+
+
+
+	float kierunek_patrzenia = fmod(abs(tank_model.get_pozycja_wieza() + tank_model.get_pozycja_kadlub()), 2 * PI);
+
+	if (odleglosc_od_gracza > 36)
+		d = fmod(abs(tank_model.get_pozycja_kadlub()), 2 * PI);
+
+
 	//if (kierunek_patrzenia < 0)kierunek_patrzenia *= -1;
-	if (pozycja.x < pozycja_gracza->x) d +=PI;
+	if (pozycja.x < pozycja_gracza->x&& odleglosc_od_gracza <= 36) d += PI;
 
 	float odl = abs(d - kierunek_patrzenia);
 	float odl_przez_0 = 2 * PI - abs(d - kierunek_patrzenia);
 
-	if(abs(kierunek_patrzenia-d)>0.01) // unikamy niepotrzebnego ruchu lewo prawo kiedy gracz jest ju¿ namierzony
+	if (abs(kierunek_patrzenia - d) > 0.01)// unikamy niepotrzebnego ruchu lewo prawo kiedy gracz jest ju¿ namierzony
+	{
 		if (odl_przez_0 < odl)
 		{
 			if (kierunek_patrzenia > d)
@@ -376,14 +432,23 @@ void Enemy::update(float czas)
 			}
 		}
 
+	}
 
+	if (odleglosc_od_gracza < 36 && abs(kierunek_patrzenia - d) <= 0.01)
+	{
+		flag_czy_widac_gracza = true;
+	}
+	else
+	{
+		flag_czy_widac_gracza = false;
+	}
+}
 
-
-	//std::cout << kierunek_patrzenia << " | " << d << std::endl;
-
-	//std::cout << "(" << pozycja.x << "," << pozycja.y << ") | (" << pozycja_gracza->x << "," << pozycja_gracza->y << ")\n";
-
-	tank_model.update(czas, flag_czy_ruch);
+bool Enemy::czy_zyje()
+{
+	if (dead_animation_progress == 0)
+		return true;
+	return false;
 }
 
 void Enemy::set_tank_model(Tank t)
@@ -409,4 +474,9 @@ void Enemy::set_pozycja_gracza_pointer(wspolzedne* wp)
 wspolzedne Enemy::get_pozycja()
 {
 	return pozycja;
+}
+
+void Enemy::set_particle_manager(ParticleEffect_Manager* pm)
+{
+	particle_manager = pm;
 }
