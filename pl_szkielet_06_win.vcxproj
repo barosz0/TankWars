@@ -24,8 +24,6 @@
     <ClInclude Include="Gra.h" />
     <ClInclude Include="Interface.h" />
     <ClInclude Include="lodepng.h" />
-    <ClInclude Include="myCube.h" />
-    <ClInclude Include="myTeapot.h" />
     <ClInclude Include="obj3d.h" />
     <ClInclude Include="Obstacle.h" />
     <ClInclude Include="ParticleEffect.h" />

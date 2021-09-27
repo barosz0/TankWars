@@ -209,12 +209,12 @@ void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kad
 		speed_kadlub*= (-1);
 
 
-	player_tank->obroc_wierze(czas * speed_wierza);
-	player_tank->obroc_kadlub(czas * speed_kadlub);
+	player_tank->obroc_wierze(czas * speed_wierza * (2 / 3.0));
+	player_tank->obroc_kadlub(czas * speed_kadlub*(2/3.0));
 
 
-	//rusz_gracza(czas * speed_kam);
-	rusz_gracza(czas * speed_kam*5); //szybszy ruch
+	rusz_gracza(czas * speed_kam*1.5);
+	//rusz_gracza(czas * speed_kam*5); //szybszy ruch
 
 
 	if (speed_kam != 0 || speed_kadlub!=0)
