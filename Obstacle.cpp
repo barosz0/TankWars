@@ -11,7 +11,7 @@ void Obstacle::draw(ShaderProgram* sp, glm::mat4 M)
 	glm::mat4 pom_M = glm::translate(M, glm::vec3(pozycja.x, 0.0f, pozycja.y));
 
 	pom_M = glm::scale(pom_M, glm::vec3(0.5, 0.5, 0.5)); //zmniejszenie kostki
-	pom_M = glm::translate(pom_M, glm::vec3(0.0f, 1.0f, 0.0f)); //przesuniecie na podloze
+	pom_M = glm::translate(pom_M, glm::vec3(0.0f, korekta_pion, 0.0f)); //przesuniecie na podloze
 
 	glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
 	obj->draw(sp);
@@ -33,4 +33,9 @@ wspolzedne Obstacle::rozwiaz_kolizje(wspolzedne t, wspolzedne r, int n)
 		return rozwiaz_kolizje(t, pom, n - 1);
 	else
 		return rozwiaz_kolizje(pom, r, n - 1);
+}
+
+void Obstacle::set_korekta_pion(float kp)
+{
+	korekta_pion = kp;
 }

@@ -1,6 +1,7 @@
 #include "Interface.h"
 Interface::Interface() :
-	rozmiar_numbers(1)
+	rozmiar_numbers(1),
+	aspectRatioI(1)
 {
 
 }
@@ -10,8 +11,8 @@ void Interface::draw_interface(int hp, int ammo_ilosc)
 	interface_shader->use();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	_draw_hearts(hp, -1, -1);
-	_draw_ammo(ammo_ilosc, 0.6, -1);
+	_draw_hearts(hp, -1.74, -0.97);
+	_draw_ammo(ammo_ilosc, 1.4, -0.97);
 	_draw_crosshair(0, 0.05);
 }
 
@@ -36,6 +37,11 @@ void Interface::_draw_hearts(int hp, float x, float y)
 			x + rozmiar + x_offset,y,
 			x + rozmiar + x_offset,y + rozmiar
 		};
+
+		for (int i = 0; i < 8; i += 2)
+		{
+			vertex[i] /= aspectRatioI;
+		}
 
 		glEnableVertexAttribArray(interface_shader->a("vertex"));
 		glVertexAttribPointer(interface_shader->a("vertex"), 2, GL_FLOAT, false, 0, vertex);
@@ -91,6 +97,11 @@ void Interface::_draw_ammo(int ilosc, float x, float y)
 		x + rozmiar,y + rozmiar
 	};
 
+	for (int i = 0; i < 8; i += 2)
+	{
+		vertex[i] /= aspectRatioI;
+	}
+
 	float texCoords[] =
 	{
 		0,1,
@@ -124,6 +135,11 @@ void Interface::_draw_ammo(int ilosc, float x, float y)
 			x + rozmiar,y,
 			x + rozmiar,y + rozmiar
 		};
+
+		for (int i = 0; i < 8; i += 2)
+		{
+			vertex2[i] /= aspectRatioI;
+		}
 
 		glEnableVertexAttribArray(interface_shader->a("vertex"));
 		glVertexAttribPointer(interface_shader->a("vertex"), 2, GL_FLOAT, false, 0, vertex2);
@@ -175,6 +191,11 @@ void Interface::_draw_crosshair(float x, float y)
 		x + rozmiar/2, y + rozmiar/2
 	};
 
+	for (int i = 0; i < 8; i += 2)
+	{
+		vertex[i] /= aspectRatioI;
+	}
+
 	float texCoords[] =
 	{
 		0,1,
@@ -220,4 +241,9 @@ void Interface::set_shader(ShaderProgram *s)
 void Interface::set_tex_crosshair(GLuint t)
 {
 	crosshair = t;
+}
+
+void Interface::set_aspectRatio(float ar)
+{
+	aspectRatioI = ar;
 }

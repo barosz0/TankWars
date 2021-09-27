@@ -17,6 +17,8 @@ class Interface
 	std::vector<std::pair<int, int>> numbers_offset; //offset size
 	int rozmiar_numbers;
 
+	float aspectRatioI;
+
 	ShaderProgram *interface_shader;
 
 	void _draw_hearts(int hp, float x, float y);
@@ -28,6 +30,7 @@ public:
 
 	void draw_interface(int hp,int ammo_ilosc);
 
+	void set_aspectRatio(float ar);
 	void set_tex_numbers(GLuint t, std::vector<std::pair<int, int>> n_o, int r_n);
 	void set_tex_ammo(GLuint t);
 	void set_tex_hearts(GLuint t);

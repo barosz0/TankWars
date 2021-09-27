@@ -24,6 +24,7 @@ class Obstacle
 	obj3d* obj;
 	wspolzedne pozycja;
 	float rozmiar = 0.8;
+	float korekta_pion=0.0;
 
 public:
 
@@ -33,5 +34,6 @@ public:
 	bool czy_kolizja(wspolzedne tank);
 	wspolzedne rozwiaz_kolizje(wspolzedne t, wspolzedne r, int n); //w tym momencie nie uzywana
 
+	void set_korekta_pion(float kp);
 
 };

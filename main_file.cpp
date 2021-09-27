@@ -44,13 +44,19 @@ Place, Fifth Floor, Boston, MA  02110 - 1301  USA
 #include "Gra.h"
 #include "ParticleEffect_Manager.h"
 
+int const res_Y=1080;
+int const res_X = 1920;
 
 
 bool shoot = false;
 float speed_x=0;
 float speed_y=0;
 float speed_kamera = 0;
-float aspectRatio = 1;
+float aspectRatio = res_X/ (double)res_Y;
+
+
+float obrocenie_wierzy_kam = 0; // do zmiany kamery na bok wierzy
+
 
 float speed_w = 0; // obrot wierza
 float speed_k = 0; // obrot kadlub
@@ -355,6 +361,14 @@ void keyCallback(GLFWwindow* window,int key,int scancode,int action,int mods) {
 		if (key == GLFW_KEY_S) speed_kamera += PI / 2;
 
 		if (key == GLFW_KEY_SPACE) shoot = false;
+
+		if (key == GLFW_KEY_C)
+		{
+			if (obrocenie_wierzy_kam == 0)
+				obrocenie_wierzy_kam = PI / 2;
+			else
+				obrocenie_wierzy_kam = 0;
+		}
     }
 }
 
@@ -367,7 +381,7 @@ void windowResizeCallback(GLFWwindow* window,int width,int height) {
 void draw_logo()
 {
 	ShaderProgram* spL = new ShaderProgram("v_logo.glsl", NULL, "f_logo.glsl");
-	float aspectRatio = 1;
+	//float aspectRatio = 1;
 
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -377,11 +391,11 @@ void draw_logo()
 	GLuint loadtex = readTexture("Textures\\LoadScreen.png");
 
 
-	int rozmiarX = 1920, rozmiarY = 900;
+	int rozmiarX = 1920, rozmiarY = 900; // rozmiar obrazu
 
 	float proporcja = rozmiarX / (float)rozmiarY;
 
-	rozmiarX = 1*proporcja;
+	rozmiarX = proporcja/aspectRatio;
 	rozmiarY = 1;
 
 
@@ -526,11 +540,40 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 	std::vector<obj3d*>* przeszkody = new std::vector<obj3d*>;
 
-	tex0 = readTexture("models\\crate_1.png");
-	r = load("models\\crate.obj");
+
+	tex0 = readTexture("Textures\\junkstacktex.png");
+	r = load("models\\Przeszkody\\junkstack.obj");
 	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
 
 	przeszkody->push_back(pom_obj);
+
+	tex0 = readTexture("Textures\\plywood.png");
+	r = load("models\\Przeszkody\\paleta.obj");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+
+	przeszkody->push_back(pom_obj);
+
+	/*tex0 = readTexture("Textures\\plywood2.png");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+
+	przeszkody->push_back(pom_obj);*/
+
+	tex0 = readTexture("Textures\\plywood3.png");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+
+	przeszkody->push_back(pom_obj);
+
+	tex0 = readTexture("Textures\\plywood.png");
+	r = load("models\\Przeszkody\\paleta_wyzsza.obj");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+
+	przeszkody->push_back(pom_obj);
+
+	tex0 = readTexture("Textures\\plywood3.png");
+	pom_obj = new obj3d(r[0], r[2], r[1], *r[3], tex0);
+
+	przeszkody->push_back(pom_obj);
+
 
 	//ladowanie efektow czasteczkowych
 
@@ -577,6 +620,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	//interface
 
 	Interface *UI = new Interface;
+	UI->set_aspectRatio(aspectRatio);
 	tex0 = readTexture("Textures\\ammo.png");
 	UI->set_tex_ammo(tex0);
 	tex0 = readTexture("Textures\\hearts.png");
@@ -705,7 +749,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	window = glfwCreateWindow(1000, 1000, "TankWars", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
+	window = glfwCreateWindow(res_X, res_Y, "TankWars", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL.
 
 	if (!window) //Jeżeli okna nie udało się utworzyć, to zamknij program
 	{
@@ -748,7 +792,7 @@ int main(void)
 
         glfwSetTime(0); //Zeruj timer
 
-		main_game->drawScene(window, t->get_pozycja_wieza() + t->get_pozycja_kadlub());
+		main_game->drawScene(window, t->get_pozycja_wieza() + t->get_pozycja_kadlub()+obrocenie_wierzy_kam,aspectRatio);
 		//drawScene(window,angle_x,angle_y,t->get_pozycja_wieza()+t->get_pozycja_kadlub()); //Wykonaj procedurę rysującą
 		glfwPollEvents(); //Wykonaj procedury callback w zalezności od zdarzeń jakie zaszły.
 

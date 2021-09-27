@@ -19,7 +19,7 @@ Gra::Gra(obj3d *z)
 
 void Gra::create_game()
 {
-	int liczba_przeszkod = 1;
+	int liczba_przeszkod = 10;
 	int liczba_przeciwnikow = 1;
 
 	//tworzenie tablicy flag zajecia pola
@@ -102,7 +102,10 @@ void Gra::draw_map(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 		}
 
 	//rysowanie scian
-	glm::mat4 pom_MS= glm::translate(M, glm::vec3(0.0f, 0.0f, -1.0f));
+
+	float zmiana_wysokosci_scian = -0.3f;
+
+	glm::mat4 pom_MS= glm::translate(M, glm::vec3(0.0f, zmiana_wysokosci_scian, -1.0f));
 	pom_MS = glm::rotate(pom_MS, PI/2, glm::vec3(1.0f, 0.0f, 0.0f));
 
 
@@ -115,7 +118,7 @@ void Gra::draw_map(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 	}
 
 
-	pom_MS = glm::translate(M, glm::vec3(0.0f, 0.0f, -1.0f));
+	pom_MS = glm::translate(M, glm::vec3(0.0f, zmiana_wysokosci_scian, -1.0f));
 	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(-1.0f, 0.0f, 0.0f));
 
 	for (int i = 0; i < rozmiar_mapy; i++)
@@ -126,40 +129,40 @@ void Gra::draw_map(ShaderProgram* sp, glm::mat4 M) // rysowanie podloza i scian
 	}
 
 
-	pom_MS = glm::translate(M, glm::vec3(-1.0f, 0.0f, 0.0f));
+	pom_MS = glm::translate(M, glm::vec3(-1.0f, zmiana_wysokosci_scian, 0.0f));
 	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
 	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 	//glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_MS));
 	//sciana_obj->draw(sp);
 
 	
-		for (int i = 0; i < rozmiar_mapy; i++)
-		{
-			pom_M = glm::translate(pom_MS, glm::vec3(-2.0f * i, 0.0f, 0.0f));
-			glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
-			sciana_obj->draw(sp);
-		}
+	for (int i = 0; i < rozmiar_mapy; i++)
+	{
+		pom_M = glm::translate(pom_MS, glm::vec3(-2.0f * i, 0.0f, 0.0f));
+		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
+		sciana_obj->draw(sp);
+	}
 
-		pom_MS = glm::translate(M, glm::vec3(-1.0f, 0.0f, 0.0f));
-		pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 0.0f, 1.0f));
-		pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 1.0f, 0.0f));
+	pom_MS = glm::translate(M, glm::vec3(-1.0f, zmiana_wysokosci_scian, 0.0f));
+	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 0.0f, 1.0f));
+	pom_MS = glm::rotate(pom_MS, PI / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		for (int i = 0; i < rozmiar_mapy; i++)
-		{
-			pom_M = glm::translate(pom_MS, glm::vec3(-2.0f * i, -rozmiar_mapy*2, 0.0f));
-			glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
-			sciana_obj->draw(sp);
-		}
-
-		
-		
-		//rysowanie przeszkod
+	for (int i = 0; i < rozmiar_mapy; i++)
+	{
+		pom_M = glm::translate(pom_MS, glm::vec3(-2.0f * i, -rozmiar_mapy*2, 0.0f));
+		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(pom_M));
+		sciana_obj->draw(sp);
+	}
 
 		
+		
+	//rysowanie przeszkod
 
-		for (int i = 0; i < przeszkody.size(); i++)
-		{
-			przeszkody[i]->draw(sp,M);
+		
+
+	for (int i = 0; i < przeszkody.size(); i++)
+	{
+		przeszkody[i]->draw(sp,M);
 		}
 }
 
@@ -185,7 +188,14 @@ void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kad
 
 
 	if (shoot && shoot_cooldown < 0 && ilosc_ammo>0) {
-		particle_manager->start_effect("shoot_effect", glm::vec3(pozycja_gracza.x, 0.0f, pozycja_gracza.y), -(player_tank->get_pozycja_wieza() + player_tank->get_pozycja_kadlub()));
+
+		glm::vec3 kierunek_lufy = glm::vec3(sin(player_tank->get_pozycja_kadlub() + player_tank->get_pozycja_wieza()), 0.0f,
+			cos(player_tank->get_pozycja_kadlub() + player_tank->get_pozycja_wieza()));
+
+		glm::vec3 czubek_lufy = kierunek_lufy * 0.7f;
+
+		particle_manager->start_effect("shoot_effect", glm::vec3(pozycja_gracza.x, -0.2f, pozycja_gracza.y) + czubek_lufy,
+			-(player_tank->get_pozycja_wieza() + player_tank->get_pozycja_kadlub()));
 		player_oddaj_strzal();
 		shoot_cooldown = 1;
 		ilosc_ammo--;
@@ -231,9 +241,9 @@ void Gra::update(float czas, float speed_kam,float speed_wierza, float speed_kad
 
 }
 
-void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
+void Gra::drawScene(GLFWwindow* window, float obrot_kamery, float aspectRatioL)
 {
-	float aspectRatio = 1; //do sprawdzenia czy potrzebne
+	//float aspectRatio = 1; //do sprawdzenia czy potrzebne
 	
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -244,7 +254,7 @@ void Gra::drawScene(GLFWwindow* window, float obrot_kamery)
 		glm::vec3(0.0f, 1.0f, 0.0f));
 
 	V = glm::rotate(V, obrot_kamery, glm::vec3(0.0f, -1.0f, 0.0f));
-	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatio, 0.01f, 50.0f);
+	glm::mat4 P = glm::perspective(50.0f * PI / 180.0f, aspectRatioL, 0.01f, 50.0f);
 
 	mainShader->use();
 

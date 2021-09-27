@@ -58,7 +58,7 @@ public:
 	void draw_map(ShaderProgram* sp, glm::mat4 M); 
 	void draw_enemy(ShaderProgram* sp, glm::mat4 M);
 	void update(float t, float speed_kam, float speed_wierza, float speed_kadlub, bool shoot);
-	void drawScene(GLFWwindow* window, float obrot_kamery);
+	void drawScene(GLFWwindow* window, float obrot_kamery, float aspectRatioL);
 
 	void create_game();
 
