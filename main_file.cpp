@@ -30,8 +30,7 @@ Place, Fifth Floor, Boston, MA  02110 - 1301  USA
 #include "constants.h"
 #include "lodepng.h"
 #include "shaderprogram.h"
-#include "myCube.h"
-#include "myTeapot.h"
+
 
 
 #include <fstream>
@@ -89,19 +88,14 @@ Tank *t;
 Tank *te;
 
 //Odkomentuj, żeby rysować kostkę
-float* vertices = myCubeVertices;
-float* normals = myCubeNormals;
-float* texCoords = myCubeTexCoords;
-float* colors = myCubeColors;
-int vertexCount = myCubeVertexCount;
+float* vertices ;
+float* normals;
+float* texCoords;
+float* colors;
+int vertexCount;
 
 
-//Odkomentuj, żeby rysować czajnik
-//float* vertices = myTeapotVertices;
-//float* normals = myTeapotVertexNormals;
-//float* texCoords = myTeapotTexCoords;
-//float* colors = myTeapotColors;
-//int vertexCount = myTeapotVertexCount;
+
 
 float losuj_os_x_dym(std::default_random_engine &generator)
 {
